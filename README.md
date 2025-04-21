@@ -741,17 +741,10 @@ df.drop(columns=columns_with_null, inplace=True)
 - The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their post-game performance statistics—such as kills, assists, gold earned per minute, and damage dealt per minute—rather than using manually labeled or externally sourced data.
 
 ### Evaluation Metric
-- We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is an intuitive and straightforward way to measure how often our model correctly predicts a player’s role. If the class distribution were more imbalanced or if misclassifying certain roles carried different costs (e.g., support vs. mid), we might consider metrics like **F1-score** or **weighted precision/recall** instead.
+- We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is the most intuitive way to measure how often our model correctly predicts a player’s role. 
 
 ### Information Available at Time of Prediction
-Our model is designed to use only **post-game player statistics** (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We **exclude draft picks, team-level objectives, or opponent statistics**, as these would not be reliable or player-specific indicators for individual performance patterns. This ensures that the features used are consistent with what would be available if we were trying to infer a player's role after the game, without relying on predefined labels or external metadata.
-
-
-
-
-
-
-
+- Our model is designed to use only post-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We exclused draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
 
 ## Step 4: Baseline Model
 ### Baseline Model

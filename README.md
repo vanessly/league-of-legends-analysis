@@ -578,17 +578,16 @@ df.drop(columns=columns_with_null, inplace=True)
     </tr>
   </tbody>
 </table>
-### Univariate Analysis
 
- <iframe
+
+### Univariate Analysis
+<iframe
  src="assets/univ-kills-dist.html"
  width="800"
  height="600"
  frameborder="0"
  ></iframe>
  
-
-
 ### Bivariate Analysis
 ### Interesting Aggregates
 ### Imputation

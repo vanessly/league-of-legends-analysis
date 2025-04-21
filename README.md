@@ -19,17 +19,53 @@
 
 Below are the columns relevant to our question:
 
-| Column        | Description                                                       |
-|---------------|-------------------------------------------------------------------|
-| `gameid`    | Unique ID for each match (ties together all player and team rows) |
-| `position`  | The role a player filled in that game (Top, Jungle, Mid, Bot, Support) |
-| `kills`     | Number of enemy champions the player eliminated                   |
-| `assists`   | Number of enemy champion kills the player helped secure           |
-| `deaths`   | Number of times the player was eliminated by enemy champions      |
-| `dpm`       | Damage per minute: average damage dealt to champions per minute   |
-| `earned gpm`| Gold per minute earned by the player throughout the match         |
-| `cspm`      | Creep score per minute: average minions and monsters killed per minute |
-| `monsterkills` | Total number of neutral monsters killed by the player         |
+<table>
+  <thead>
+    <tr>
+      <th>Column</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>gameid</code></td>
+      <td>Unique ID for each match (ties together all player and team rows)</td>
+    </tr>
+    <tr>
+      <td><code>position</code></td>
+      <td>The role a player filled in that game (Top, Jungle, Mid, Bot, Support)</td>
+    </tr>
+    <tr>
+      <td><code>kills</code></td>
+      <td>Number of enemy champions the player eliminated</td>
+    </tr>
+    <tr>
+      <td><code>assists</code></td>
+      <td>Number of enemy champion kills the player helped secure</td>
+    </tr>
+    <tr>
+      <td><code>deaths</code></td>
+      <td>Number of times the player was eliminated by enemy champions</td>
+    </tr>
+    <tr>
+      <td><code>dpm</code></td>
+      <td>Damage per minute: average damage dealt to champions per minute</td>
+    </tr>
+    <tr>
+      <td><code>earned gpm</code></td>
+      <td>Gold per minute earned by the player throughout the match</td>
+    </tr>
+    <tr>
+      <td><code>cspm</code></td>
+      <td>Creep score per minute: average minions and monsters killed per minute</td>
+    </tr>
+    <tr>
+      <td><code>monsterkills</code></td>
+      <td>Total number of neutral monsters killed by the player</td>
+    </tr>
+  </tbody>
+</table>
+
 ## Step 2: Data Cleaning and Exploratory Data Analysis
 ### Data Cleaning
 
@@ -581,7 +617,6 @@ df.drop(columns=columns_with_null, inplace=True)
     </tr>
   </tbody>
 </table>
-
 
 ### Univariate Analysis
 <iframe

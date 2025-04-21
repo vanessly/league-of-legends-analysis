@@ -5,7 +5,7 @@
 ### Introduction and Question Identification
 #### Dataset Overview
 
-For our project, we’re using the **Oracle’s Elixir League of Legends Match Data** from the 2022 season. This dataset contains information from over 10,000 League of Legends professional matches. There are about 120,000 rows in total (each match contributes up to 12 rows: one per player plus two team‑summary rows).
+- For our project, we’re using the **Oracle’s Elixir League of Legends Match Data** from the 2022 season. This dataset contains information from over 10,000 League of Legends professional matches. There are about 120,000 rows in total (each match contributes up to 12 rows: one per player plus two team‑summary rows).
 
 #### Central Question
 
@@ -13,7 +13,7 @@ For our project, we’re using the **Oracle’s Elixir League of Legends Match D
 
 #### Why It Matters
 
-Automatically predicting a player’s position from raw match stats has practical value for coaches, pro-players, analysts, and broadcasters. **Coaches** can see if their players' performances line up with expected performances of other players within the same position, and make statistically-backed decisions to optimize their team roster. Simarily, **pro-players** can utilize this tool to see where they are lacking in their skills, and make adjustments to improve their gameplay. **Analysts** and **broadcasters** can utilize this data as a fun and engaging statistic and classifier for audiences. 
+- Automatically predicting a player’s position from raw match stats has practical value for coaches, pro-players, analysts, and broadcasters. **Coaches** can see if their players' performances line up with expected performances of other players within the same position, and make statistically-backed decisions to optimize their team roster. Simarily, **pro-players** can utilize this tool to see where they are lacking in their skills, and make adjustments to improve their gameplay. **Analysts** and **broadcasters** can utilize this data as a fun and engaging statistic and classifier for audiences. 
 
 #### Key Columns
 
@@ -33,7 +33,7 @@ Below are the columns relevant to our question:
 ## Step 2: Data Cleaning and Exploratory Data Analysis
 ### Data Cleaning
 
-To ensure that our analysis focused only on meaningful, player-level statistics relevant to role prediction, we applied several cleaning steps to the original dataset. Each step was informed by how the data is structured and generated in professional League of Legends matches.
+- To ensure that our analysis focused only on meaningful, player-level statistics relevant to role prediction, we applied several cleaning steps to the original dataset. Each step was informed by how the data is structured and generated in professional League of Legends matches.
 
 #### 1. Filtered only for complete player data
 ```python
@@ -65,23 +65,528 @@ df.drop(columns=cols_to_drop, inplace=True)
 columns_with_null = df.isnull().sum()[df.isnull().sum() > 0].index.to_list()
 df.drop(columns=columns_with_null, inplace=True)
 ```
-We identified and removed all columns that had missing values. Upon inspection, these columns did not contain statistics that are relevant to our modeling goal (predicting roles based on in-game performance). Keeping them would have required imputation strategies that could introduce bias.
+- We identified and removed all columns that had missing values. Upon inspection, these columns did not contain statistics that are relevant to our modeling goal (predicting roles based on in-game performance). Keeping them would have required imputation strategies that could introduce bias.
 
 #### Final cleaned dataframe
-| gameid                | datacompleteness   | league   |   year |   playoffs | date                |   game |   patch |   participantid | side   | position   | playername   | champion   |   gamelength |   result |   kills |   deaths |   assists |   teamkills |   teamdeaths |   doublekills |   triplekills |   quadrakills |   pentakills |   firstblood |   firstbloodkill |   firstbloodassist |   firstbloodvictim |   team kpm |   ckpm |   damagetochampions |     dpm |   damageshare |   damagetakenperminute |   damagemitigatedperminute |   wardsplaced |    wpm |   wardskilled |   wcpm |   controlwardsbought |   visionscore |   vspm |   totalgold |   earnedgold |   earned gpm |   earnedgoldshare |   goldspent |   total cs |   minionkills |   monsterkills |   cspm |   goldat10 |   xpat10 |   csat10 |   opp_goldat10 |   opp_xpat10 |   opp_csat10 |   golddiffat10 |   xpdiffat10 |   csdiffat10 |   killsat10 |   assistsat10 |   deathsat10 |   opp_killsat10 |   opp_assistsat10 |   opp_deathsat10 |   goldat15 |   xpat15 |   csat15 |   opp_goldat15 |   opp_xpat15 |   opp_csat15 |   golddiffat15 |   xpdiffat15 |   csdiffat15 |   killsat15 |   assistsat15 |   deathsat15 |   opp_killsat15 |   opp_assistsat15 |   opp_deathsat15 |
-|:----------------------|:-------------------|:---------|-------:|-----------:|:--------------------|-------:|--------:|----------------:|:-------|:-----------|:-------------|:-----------|-------------:|---------:|--------:|---------:|----------:|------------:|-------------:|--------------:|--------------:|--------------:|-------------:|-------------:|-----------------:|-------------------:|-------------------:|-----------:|-------:|--------------------:|--------:|--------------:|-----------------------:|---------------------------:|--------------:|-------:|--------------:|-------:|---------------------:|--------------:|-------:|------------:|-------------:|-------------:|------------------:|------------:|-----------:|--------------:|---------------:|-------:|-----------:|---------:|---------:|---------------:|-------------:|-------------:|---------------:|-------------:|-------------:|------------:|--------------:|-------------:|----------------:|------------------:|-----------------:|-----------:|---------:|---------:|---------------:|-------------:|-------------:|---------------:|-------------:|-------------:|------------:|--------------:|-------------:|----------------:|------------------:|-----------------:|
-| ESPORTSTMNT01_2690210 | complete           | LCKC     |   2022 |          0 | 2022-01-10 07:44:08 |      1 |   12.01 |               1 | Blue   | top        | Soboro       | Renekton   |         1713 |        0 |       2 |        3 |         2 |           9 |           19 |             0 |             0 |             0 |            0 |            0 |                0 |                  0 |                  0 |     0.3152 | 0.9807 |               15768 | 552.294 |     0.278784  |               1072.4   |                    777.793 |             8 | 0.2802 |             6 | 0.2102 |                    5 |            26 | 0.9107 |       10934 |         7164 |      250.928 |          0.253859 |       10275 |        231 |           220 |             11 | 8.0911 |       3228 |     4909 |       89 |           3176 |         4953 |           81 |             52 |          -44 |            8 |           0 |             0 |            0 |               0 |                 0 |                0 |       5025 |     7560 |      135 |           4634 |         7215 |          121 |            391 |          345 |           14 |           0 |             1 |            0 |               0 |                 1 |                0 |
-| ESPORTSTMNT01_2690210 | complete           | LCKC     |   2022 |          0 | 2022-01-10 07:44:08 |      1 |   12.01 |               2 | Blue   | jng        | Raptor       | Xin Zhao   |         1713 |        0 |       2 |        5 |         6 |           9 |           19 |             0 |             0 |             0 |            0 |            1 |                0 |                  1 |                  0 |     0.3152 | 0.9807 |               11765 | 412.084 |     0.208009  |                944.273 |                    650.158 |             6 | 0.2102 |            18 | 0.6305 |                    6 |            48 | 1.6813 |        9138 |         5368 |      188.021 |          0.19022  |        8750 |        148 |            33 |            115 | 5.1839 |       3429 |     3484 |       58 |           2944 |         3052 |           63 |            485 |          432 |           -5 |           1 |             2 |            0 |               0 |                 0 |                1 |       5366 |     5320 |       89 |           4825 |         5595 |          100 |            541 |         -275 |          -11 |           2 |             3 |            2 |               0 |                 5 |                1 |
-| ESPORTSTMNT01_2690210 | complete           | LCKC     |   2022 |          0 | 2022-01-10 07:44:08 |      1 |   12.01 |               3 | Blue   | mid        | Feisty       | LeBlanc    |         1713 |        0 |       2 |        2 |         3 |           9 |           19 |             0 |             0 |             0 |            0 |            0 |                0 |                  0 |                  0 |     0.3152 | 0.9807 |               14258 | 499.405 |     0.252086  |                581.646 |                    227.776 |            19 | 0.6655 |             7 | 0.2452 |                    7 |            29 | 1.0158 |        9715 |         5945 |      208.231 |          0.210665 |        8725 |        193 |           177 |             16 | 6.7601 |       3283 |     4556 |       81 |           3121 |         4485 |           81 |            162 |           71 |            0 |           0 |             1 |            0 |               0 |                 0 |                1 |       5118 |     6942 |      120 |           5593 |         6789 |          119 |           -475 |          153 |            1 |           0 |             3 |            0 |               3 |                 3 |                2 |
-| ESPORTSTMNT01_2690210 | complete           | LCKC     |   2022 |          0 | 2022-01-10 07:44:08 |      1 |   12.01 |               4 | Blue   | bot        | Gamin        | Samira     |         1713 |        0 |       2 |        4 |         2 |           9 |           19 |             0 |             0 |             0 |            0 |            1 |                0 |                  1 |                  0 |     0.3152 | 0.9807 |               11106 | 389.002 |     0.196358  |                463.853 |                    218.879 |            12 | 0.4203 |             6 | 0.2102 |                    4 |            25 | 0.8757 |       10605 |         6835 |      239.405 |          0.242201 |       10425 |        226 |           208 |             18 | 7.9159 |       3600 |     3103 |       78 |           3304 |         2838 |           90 |            296 |          265 |          -12 |           1 |             1 |            0 |               0 |                 0 |                0 |       5461 |     4591 |      115 |           6254 |         5934 |          149 |           -793 |        -1343 |          -34 |           2 |             1 |            2 |               3 |                 3 |                0 |
-| ESPORTSTMNT01_2690210 | complete           | LCKC     |   2022 |          0 | 2022-01-10 07:44:08 |      1 |   12.01 |               5 | Blue   | sup        | Loopy        | Leona      |         1713 |        0 |       1 |        5 |         6 |           9 |           19 |             0 |             0 |             0 |            0 |            1 |                1 |                  0 |                  0 |     0.3152 | 0.9807 |                3663 | 128.301 |     0.0647631 |                475.026 |                    490.123 |            29 | 1.0158 |            14 | 0.4904 |                   11 |            69 | 2.4168 |        6678 |         2908 |      101.856 |          0.103054 |        6395 |         42 |            42 |              0 | 1.4711 |       2678 |     2161 |       16 |           2150 |         2748 |           15 |            528 |         -587 |            1 |           1 |             1 |            0 |               0 |                 0 |                1 |       3836 |     3588 |       28 |           3393 |         4085 |           21 |            443 |         -497 |            7 |           1 |             2 |            2 |               0 |                 6 |                2 |
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>gameid</th>
+      <th>datacompleteness</th>
+      <th>league</th>
+      <th>year</th>
+      <th>playoffs</th>
+      <th>date</th>
+      <th>game</th>
+      <th>patch</th>
+      <th>participantid</th>
+      <th>side</th>
+      <th>position</th>
+      <th>playername</th>
+      <th>champion</th>
+      <th>gamelength</th>
+      <th>result</th>
+      <th>kills</th>
+      <th>deaths</th>
+      <th>assists</th>
+      <th>teamkills</th>
+      <th>teamdeaths</th>
+      <th>doublekills</th>
+      <th>triplekills</th>
+      <th>quadrakills</th>
+      <th>pentakills</th>
+      <th>firstblood</th>
+      <th>firstbloodkill</th>
+      <th>firstbloodassist</th>
+      <th>firstbloodvictim</th>
+      <th>team kpm</th>
+      <th>ckpm</th>
+      <th>damagetochampions</th>
+      <th>dpm</th>
+      <th>damageshare</th>
+      <th>damagetakenperminute</th>
+      <th>damagemitigatedperminute</th>
+      <th>wardsplaced</th>
+      <th>wpm</th>
+      <th>wardskilled</th>
+      <th>wcpm</th>
+      <th>controlwardsbought</th>
+      <th>visionscore</th>
+      <th>vspm</th>
+      <th>totalgold</th>
+      <th>earnedgold</th>
+      <th>earned gpm</th>
+      <th>earnedgoldshare</th>
+      <th>goldspent</th>
+      <th>total cs</th>
+      <th>minionkills</th>
+      <th>monsterkills</th>
+      <th>cspm</th>
+      <th>goldat10</th>
+      <th>xpat10</th>
+      <th>csat10</th>
+      <th>opp_goldat10</th>
+      <th>opp_xpat10</th>
+      <th>opp_csat10</th>
+      <th>golddiffat10</th>
+      <th>xpdiffat10</th>
+      <th>csdiffat10</th>
+      <th>killsat10</th>
+      <th>assistsat10</th>
+      <th>deathsat10</th>
+      <th>opp_killsat10</th>
+      <th>opp_assistsat10</th>
+      <th>opp_deathsat10</th>
+      <th>goldat15</th>
+      <th>xpat15</th>
+      <th>csat15</th>
+      <th>opp_goldat15</th>
+      <th>opp_xpat15</th>
+      <th>opp_csat15</th>
+      <th>golddiffat15</th>
+      <th>xpdiffat15</th>
+      <th>csdiffat15</th>
+      <th>killsat15</th>
+      <th>assistsat15</th>
+      <th>deathsat15</th>
+      <th>opp_killsat15</th>
+      <th>opp_assistsat15</th>
+      <th>opp_deathsat15</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ESPORTSTMNT01_2690210</td>
+      <td>complete</td>
+      <td>LCKC</td>
+      <td>2022</td>
+      <td>0</td>
+      <td>2022-01-10 07:44:08</td>
+      <td>1</td>
+      <td>12.01</td>
+      <td>1</td>
+      <td>Blue</td>
+      <td>top</td>
+      <td>Soboro</td>
+      <td>Renekton</td>
+      <td>1713</td>
+      <td>0</td>
+      <td>2</td>
+      <td>3</td>
+      <td>2</td>
+      <td>9</td>
+      <td>19</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.32</td>
+      <td>0.98</td>
+      <td>15768.0</td>
+      <td>552.29</td>
+      <td>0.28</td>
+      <td>1072.40</td>
+      <td>777.79</td>
+      <td>8.0</td>
+      <td>0.28</td>
+      <td>6.0</td>
+      <td>0.21</td>
+      <td>5.0</td>
+      <td>26.0</td>
+      <td>0.91</td>
+      <td>10934</td>
+      <td>7164.0</td>
+      <td>250.93</td>
+      <td>0.25</td>
+      <td>10275.0</td>
+      <td>231.0</td>
+      <td>220.0</td>
+      <td>11.0</td>
+      <td>8.09</td>
+      <td>3228.0</td>
+      <td>4909.0</td>
+      <td>89.0</td>
+      <td>3176.0</td>
+      <td>4953.0</td>
+      <td>81.0</td>
+      <td>52.0</td>
+      <td>-44.0</td>
+      <td>8.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>5025.0</td>
+      <td>7560.0</td>
+      <td>135.0</td>
+      <td>4634.0</td>
+      <td>7215.0</td>
+      <td>121.0</td>
+      <td>391.0</td>
+      <td>345.0</td>
+      <td>14.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ESPORTSTMNT01_2690210</td>
+      <td>complete</td>
+      <td>LCKC</td>
+      <td>2022</td>
+      <td>0</td>
+      <td>2022-01-10 07:44:08</td>
+      <td>1</td>
+      <td>12.01</td>
+      <td>2</td>
+      <td>Blue</td>
+      <td>jng</td>
+      <td>Raptor</td>
+      <td>Xin Zhao</td>
+      <td>1713</td>
+      <td>0</td>
+      <td>2</td>
+      <td>5</td>
+      <td>6</td>
+      <td>9</td>
+      <td>19</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.32</td>
+      <td>0.98</td>
+      <td>11765.0</td>
+      <td>412.08</td>
+      <td>0.21</td>
+      <td>944.27</td>
+      <td>650.16</td>
+      <td>6.0</td>
+      <td>0.21</td>
+      <td>18.0</td>
+      <td>0.63</td>
+      <td>6.0</td>
+      <td>48.0</td>
+      <td>1.68</td>
+      <td>9138</td>
+      <td>5368.0</td>
+      <td>188.02</td>
+      <td>0.19</td>
+      <td>8750.0</td>
+      <td>148.0</td>
+      <td>33.0</td>
+      <td>115.0</td>
+      <td>5.18</td>
+      <td>3429.0</td>
+      <td>3484.0</td>
+      <td>58.0</td>
+      <td>2944.0</td>
+      <td>3052.0</td>
+      <td>63.0</td>
+      <td>485.0</td>
+      <td>432.0</td>
+      <td>-5.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>5366.0</td>
+      <td>5320.0</td>
+      <td>89.0</td>
+      <td>4825.0</td>
+      <td>5595.0</td>
+      <td>100.0</td>
+      <td>541.0</td>
+      <td>-275.0</td>
+      <td>-11.0</td>
+      <td>2.0</td>
+      <td>3.0</td>
+      <td>2.0</td>
+      <td>0.0</td>
+      <td>5.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ESPORTSTMNT01_2690210</td>
+      <td>complete</td>
+      <td>LCKC</td>
+      <td>2022</td>
+      <td>0</td>
+      <td>2022-01-10 07:44:08</td>
+      <td>1</td>
+      <td>12.01</td>
+      <td>3</td>
+      <td>Blue</td>
+      <td>mid</td>
+      <td>Feisty</td>
+      <td>LeBlanc</td>
+      <td>1713</td>
+      <td>0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>3</td>
+      <td>9</td>
+      <td>19</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.32</td>
+      <td>0.98</td>
+      <td>14258.0</td>
+      <td>499.40</td>
+      <td>0.25</td>
+      <td>581.65</td>
+      <td>227.78</td>
+      <td>19.0</td>
+      <td>0.67</td>
+      <td>7.0</td>
+      <td>0.25</td>
+      <td>7.0</td>
+      <td>29.0</td>
+      <td>1.02</td>
+      <td>9715</td>
+      <td>5945.0</td>
+      <td>208.23</td>
+      <td>0.21</td>
+      <td>8725.0</td>
+      <td>193.0</td>
+      <td>177.0</td>
+      <td>16.0</td>
+      <td>6.76</td>
+      <td>3283.0</td>
+      <td>4556.0</td>
+      <td>81.0</td>
+      <td>3121.0</td>
+      <td>4485.0</td>
+      <td>81.0</td>
+      <td>162.0</td>
+      <td>71.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>5118.0</td>
+      <td>6942.0</td>
+      <td>120.0</td>
+      <td>5593.0</td>
+      <td>6789.0</td>
+      <td>119.0</td>
+      <td>-475.0</td>
+      <td>153.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>3.0</td>
+      <td>0.0</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ESPORTSTMNT01_2690210</td>
+      <td>complete</td>
+      <td>LCKC</td>
+      <td>2022</td>
+      <td>0</td>
+      <td>2022-01-10 07:44:08</td>
+      <td>1</td>
+      <td>12.01</td>
+      <td>4</td>
+      <td>Blue</td>
+      <td>bot</td>
+      <td>Gamin</td>
+      <td>Samira</td>
+      <td>1713</td>
+      <td>0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>2</td>
+      <td>9</td>
+      <td>19</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.32</td>
+      <td>0.98</td>
+      <td>11106.0</td>
+      <td>389.00</td>
+      <td>0.20</td>
+      <td>463.85</td>
+      <td>218.88</td>
+      <td>12.0</td>
+      <td>0.42</td>
+      <td>6.0</td>
+      <td>0.21</td>
+      <td>4.0</td>
+      <td>25.0</td>
+      <td>0.88</td>
+      <td>10605</td>
+      <td>6835.0</td>
+      <td>239.40</td>
+      <td>0.24</td>
+      <td>10425.0</td>
+      <td>226.0</td>
+      <td>208.0</td>
+      <td>18.0</td>
+      <td>7.92</td>
+      <td>3600.0</td>
+      <td>3103.0</td>
+      <td>78.0</td>
+      <td>3304.0</td>
+      <td>2838.0</td>
+      <td>90.0</td>
+      <td>296.0</td>
+      <td>265.0</td>
+      <td>-12.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>5461.0</td>
+      <td>4591.0</td>
+      <td>115.0</td>
+      <td>6254.0</td>
+      <td>5934.0</td>
+      <td>149.0</td>
+      <td>-793.0</td>
+      <td>-1343.0</td>
+      <td>-34.0</td>
+      <td>2.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>3.0</td>
+      <td>3.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ESPORTSTMNT01_2690210</td>
+      <td>complete</td>
+      <td>LCKC</td>
+      <td>2022</td>
+      <td>0</td>
+      <td>2022-01-10 07:44:08</td>
+      <td>1</td>
+      <td>12.01</td>
+      <td>5</td>
+      <td>Blue</td>
+      <td>sup</td>
+      <td>Loopy</td>
+      <td>Leona</td>
+      <td>1713</td>
+      <td>0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>6</td>
+      <td>9</td>
+      <td>19</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.32</td>
+      <td>0.98</td>
+      <td>3663.0</td>
+      <td>128.30</td>
+      <td>0.06</td>
+      <td>475.03</td>
+      <td>490.12</td>
+      <td>29.0</td>
+      <td>1.02</td>
+      <td>14.0</td>
+      <td>0.49</td>
+      <td>11.0</td>
+      <td>69.0</td>
+      <td>2.42</td>
+      <td>6678</td>
+      <td>2908.0</td>
+      <td>101.86</td>
+      <td>0.10</td>
+      <td>6395.0</td>
+      <td>42.0</td>
+      <td>42.0</td>
+      <td>0.0</td>
+      <td>1.47</td>
+      <td>2678.0</td>
+      <td>2161.0</td>
+      <td>16.0</td>
+      <td>2150.0</td>
+      <td>2748.0</td>
+      <td>15.0</td>
+      <td>528.0</td>
+      <td>-587.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>3836.0</td>
+      <td>3588.0</td>
+      <td>28.0</td>
+      <td>3393.0</td>
+      <td>4085.0</td>
+      <td>21.0</td>
+      <td>443.0</td>
+      <td>-497.0</td>
+      <td>7.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>0.0</td>
+      <td>6.0</td>
+      <td>2.0</td>
+    </tr>
+  </tbody>
+</table>
 ### Univariate Analysis
+
  <iframe
  src="assets/univ-kills-dist.html"
  width="800"
  height="600"
  frameborder="0"
  ></iframe>
+ 
 
 
 ### Bivariate Analysis

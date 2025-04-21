@@ -21,31 +21,31 @@ Below are the columns relevant to our question:
 
 | Column        | Description                                                       |
 |---------------|-------------------------------------------------------------------|
-| **gameid**    | Unique ID for each match (ties together all player and team rows) |
-| **position**  | The role a player filled in that game (Top, Jungle, Mid, Bot, Support) |
-| **kills**     | Number of enemy champions the player eliminated                   |
-| **assists**   | Number of enemy champion kills the player helped secure           |
-| **deaths**    | Number of times the player was eliminated by enemy champions      |
-| **dpm**       | Damage per minute: average damage dealt to champions per minute   |
-| **earned gpm**| Gold per minute earned by the player throughout the match         |
-| **cspm**      | Creep score per minute: average minions and monsters killed per minute |
-| **monsterkills** | Total number of neutral monsters killed by the player         |
+| `gameid`    | Unique ID for each match (ties together all player and team rows) |
+| `position`  | The role a player filled in that game (Top, Jungle, Mid, Bot, Support) |
+| `kills`     | Number of enemy champions the player eliminated                   |
+| `assists`   | Number of enemy champion kills the player helped secure           |
+| `deaths`   | Number of times the player was eliminated by enemy champions      |
+| `dpm`       | Damage per minute: average damage dealt to champions per minute   |
+| `earned gpm`| Gold per minute earned by the player throughout the match         |
+| `cspm`      | Creep score per minute: average minions and monsters killed per minute |
+| `monsterkills` | Total number of neutral monsters killed by the player         |
 ## Step 2: Data Cleaning and Exploratory Data Analysis
 ### Data Cleaning
 
-- To ensure that our analysis focused only on meaningful, player-level statistics relevant to role prediction, we applied several cleaning steps to the original dataset. Each step was informed by how the data is structured and generated in professional League of Legends matches.
+- To ensure that our analysis focused only on meaningful, player-level statistics relevant to role prediction, we applied several cleaning steps to the original dataset based on how the original data is structured and generated in the dateset.
 
 #### 1. Filtered only for complete player data
 ```python
 df = df[df['datacompleteness'] == 'complete']
 ```
-- The dataset includes some rows marked as incomplete, which may result from matches where data logging failed or games were not played to completion. We filtered the DataFrame to keep only rows where 'datacompleteness' was marked as "complete", ensuring all included rows contain full, reliable statistics.
+- The dataset includes some rows marked as `incomplete`, which may result from matches where data logging failed or games were not played to completion. We filtered the DataFrame to keep only rows where `datacompleteness` was marked as `complete`, ensuring all included rows contain full, reliable statistics.
 
 #### 2. Removed team-related summary rows
 ```python
 df = df.groupby('gameid', group_keys=False).apply(lambda x: x.iloc[:-2])
 ```
-- For each gameid, the dataset contains 12 rows: 10 for individual players and 2 for team-level summary statistics. Since our prediction task focuses on individual player performance, we removed the last two rows of each match group, which correspond to team summaries. We verified that this operation worked correctly by checking that only 10 players remained in a sample game:
+- For each `gameid`, the dataset contains 12 rows: 10 for individual players and 2 for team-level summary statistics. Since our prediction task focuses on individual player performance, we removed the last two rows of each match group, which correspond to team summaries. We verified that this operation worked correctly by checking that only 10 players remained in a sample game:
 ```python
 print(df.loc[df['gameid'] == 'ESPORTSTMNT01_2690210', 'playername'])
 ```
@@ -65,7 +65,10 @@ df.drop(columns=cols_to_drop, inplace=True)
 columns_with_null = df.isnull().sum()[df.isnull().sum() > 0].index.to_list()
 df.drop(columns=columns_with_null, inplace=True)
 ```
-- We identified and removed all columns that had missing values. Upon inspection, these columns did not contain statistics that are relevant to our modeling goal (predicting roles based on in-game performance). Keeping them would have required imputation strategies that could introduce bias.
+```python
+['playerid', 'teamname', 'teamid', 'ban1', 'ban2', 'ban3', 'ban4', 'ban5', 'barons', 'opp_barons', 'inhibitors', 'opp_inhibitors', 'goldat20', 'xpat20', 'csat20', 'opp_goldat20', 'opp_xpat20', 'opp_csat20', 'golddiffat20', 'xpdiffat20', 'csdiffat20', 'killsat20', 'assistsat20', 'deathsat20', 'opp_killsat20', 'opp_assistsat20', 'opp_deathsat20', 'goldat25', 'xpat25', 'csat25', 'opp_goldat25', 'opp_xpat25', 'opp_csat25', 'golddiffat25', 'xpdiffat25', 'csdiffat25', 'killsat25', 'assistsat25', 'deathsat25', 'opp_killsat25', 'opp_assistsat25', 'opp_deathsat25']
+```
+- We identified and removed all columns that had missing values. Upon inspection, these columns did not contain statistics that are relevant to our modeling goal (predicting roles based on in-game performance). Similar to above, these columns were either redundant information or team-level data. Keeping them would have required imputation strategies that could introduce bias. 
 
 #### Final cleaned dataframe
 <table border="1" class="dataframe">
@@ -587,13 +590,168 @@ df.drop(columns=columns_with_null, inplace=True)
  height="600"
  frameborder="0"
  ></iframe>
- 
+
+ - This histogram shows the distribution of total kills per game across the dataset, and the right-skewed shape indicates that while most games have between 20 and 40 total kills, there are occasional high-kill matches. This shows that depending on the game whether that things such as game pace, aggression of players, competetiveness of players, etc,  could influence a player’s role and performance statistics, which is relevant for our model since understanding the overall distribution of kills per game helps contextualize which roles are likely to stand out based on their kill-related statistics.
+
 ### Bivariate Analysis
+
+<iframe
+ src="assets/biv-avg-kills.html"
+ width="800"
+ height="600"
+ frameborder="0"
+ ></iframe>
+
+- This bar chart displays the average number of kills per game for each player position. We observe that Bot and Mid positions have the highest kill averages, with Sup having the lowest, supporting our idea that in-game statistics like kills can help differentiate between player roles, thus directly addressing our model’s goal of predicting position from performance metrics.
+
+
+<iframe
+ src="assets/biv-ka.html"
+ width="800"
+ height="600"
+ frameborder="0"
+ ></iframe>
+
+ - This bar chart compares the average number of kills and assists per game for each player position. This shows us that **supp** players have the highest average assists and the lowest kills, and **jungle** players have more assists on average than **top**, **jungle**, **mid**. However, this also shows that additional features may be needed to accurately distinguish between the latter positions in our role prediction model.
+
+
 ### Interesting Aggregates
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>position</th>
+      <th>bot</th>
+      <th>jng</th>
+      <th>mid</th>
+      <th>sup</th>
+      <th>top</th>
+    </tr>
+    <tr>
+      <th>gameid</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ESPORTSTMNT01_2690210</th>
+      <td>5.0</td>
+      <td>3.0</td>
+      <td>4.0</td>
+      <td>0.5</td>
+      <td>1.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690219</th>
+      <td>1.5</td>
+      <td>3.5</td>
+      <td>3.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690227</th>
+      <td>1.5</td>
+      <td>1.0</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690255</th>
+      <td>4.5</td>
+      <td>2.5</td>
+      <td>3.0</td>
+      <td>2.0</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690264</th>
+      <td>3.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>2.0</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690302</th>
+      <td>5.0</td>
+      <td>3.5</td>
+      <td>7.0</td>
+      <td>0.5</td>
+      <td>5.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690328</th>
+      <td>6.0</td>
+      <td>3.5</td>
+      <td>7.5</td>
+      <td>0.5</td>
+      <td>3.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690351</th>
+      <td>1.5</td>
+      <td>0.5</td>
+      <td>4.0</td>
+      <td>0.5</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690370</th>
+      <td>4.5</td>
+      <td>2.0</td>
+      <td>0.5</td>
+      <td>0.0</td>
+      <td>0.5</td>
+    </tr>
+    <tr>
+      <th>ESPORTSTMNT01_2690390</th>
+      <td>2.5</td>
+      <td>4.5</td>
+      <td>4.5</td>
+      <td>2.0</td>
+      <td>0.5</td>
+    </tr>
+  </tbody>
+</table>
+
+- This pivot table summarizes the number of kills per game by **player position**. Each row corresponds to a unique `gameid`, and each column represents the **total number of kills** made by players in one of the five standard League of Legends roles: **bot**, **jng** (jungle), **mid**, **sup** (support), and **top**.
+- This pivot table is significant because it transforms the raw match-level data into a structured format that allows us to visualize and thus compare the kill contributions of each role across each game. By analyzing these values, we can further observe trends that tell us which roles are contributing more or less kills on average.
+
 ### Imputation
+```python
+columns_with_null = df.isnull().sum()[df.isnull().sum() > 0].index.to_list()
+df.drop(columns=columns_with_null, inplace=True)
+```
+```python
+['playerid', 'teamname', 'teamid', 'ban1', 'ban2', 'ban3', 'ban4', 'ban5', 'barons', 'opp_barons', 'inhibitors', 'opp_inhibitors', 'goldat20', 'xpat20', 'csat20', 'opp_goldat20', 'opp_xpat20', 'opp_csat20', 'golddiffat20', 'xpdiffat20', 'csdiffat20', 'killsat20', 'assistsat20', 'deathsat20', 'opp_killsat20', 'opp_assistsat20', 'opp_deathsat20', 'goldat25', 'xpat25', 'csat25', 'opp_goldat25', 'opp_xpat25', 'opp_csat25', 'golddiffat25', 'xpdiffat25', 'csdiffat25', 'killsat25', 'assistsat25', 'deathsat25', 'opp_killsat25', 'opp_assistsat25', 'opp_deathsat25']
+```
+- We did not impute any missing values. Instead, as described in Step 2, we decided to just remove any columns with missing values altogether because none of the columns with missing values were relevant to our goal of predicting roles based on in-game statistics. All of these columns were either redundant or team information.
+    - We were able to make this deduction because of our prior knowledge of the game. 
 
 ## Step 3: Framing a Prediction Problem
 ### Problem Identification
+- Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their in-game statistics?"** This is a **multiclass classification** problem, as we are predicting multipled possible categorical roles (one out of five roles)
+
+### Response Variable
+- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their post-game performance statistics—such as kills, assists, gold earned per minute, and damage dealt per minute—rather than using manually labeled or externally sourced data.
+
+### Evaluation Metric
+- We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is an intuitive and straightforward way to measure how often our model correctly predicts a player’s role. If the class distribution were more imbalanced or if misclassifying certain roles carried different costs (e.g., support vs. mid), we might consider metrics like **F1-score** or **weighted precision/recall** instead.
+
+### Information Available at Time of Prediction
+Our model is designed to use only **post-game player statistics** (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We **exclude draft picks, team-level objectives, or opponent statistics**, as these would not be reliable or player-specific indicators for individual performance patterns. This ensures that the features used are consistent with what would be available if we were trying to infer a player's role after the game, without relying on predefined labels or external metadata.
+
+
+
+
+
+
+
 
 ## Step 4: Baseline Model
 ### Baseline Model

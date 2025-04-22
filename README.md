@@ -9,7 +9,7 @@
 
 #### Central Question
 
-> **How accurately can we predict a player’s in‑game role (Top, Jungle, Mid, Bot, or Support) using only their post‑game performance statistics?**
+> **How accurately can we predict a player’s in‑game role (Top, Jungle, Mid, Bottom, or Support) using only their post‑game performance statistics?**
 
 #### Why It Matters
 
@@ -33,7 +33,7 @@ Below are the columns relevant to our question:
     </tr>
     <tr>
       <td><code>position</code></td>
-      <td>The role a player filled in that game (Top, Jungle, Mid, Bot, Support)</td>
+      <td>The role a player filled in that game (Top, Jungle, Mid, Bottom, Support)</td>
     </tr>
     <tr>
       <td><code>kills</code></td>
@@ -637,7 +637,7 @@ df.drop(columns=columns_with_null, inplace=True)
  frameborder="0"
  ></iframe>
 
-- This bar chart displays the average number of kills per game for each player position. We observe that Bot and Mid positions have the highest kill averages, with Sup having the lowest, supporting our idea that in-game statistics like kills can help differentiate between player roles, thus directly addressing our model’s goal of predicting position from performance metrics.
+- This bar chart displays the average number of kills per game for each player position. We observe that Bottom and Mid positions have the highest kill averages, with Support having the lowest, supporting our idea that in-game statistics like kills can help differentiate between player roles, thus directly addressing our model’s goal of predicting position from performance metrics.
 
 
 <iframe
@@ -773,16 +773,224 @@ df.drop(columns=columns_with_null, inplace=True)
 - Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their in-game statistics?"** This is a **multiclass classification** problem, as we are predicting multipled possible categorical roles (one out of five roles)
 
 ### Response Variable
-- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their post-game performance statistics—such as kills, assists, gold earned per minute, and damage dealt per minute—rather than using manually labeled or externally sourced data.
+- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their in-game performance statistics—such as kills, assists, gold earned per minute, and damage dealt per minute—rather than using manually labeled or externally sourced data.
 
 ### Evaluation Metric
 - We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is the most intuitive way to measure how often our model correctly predicts a player’s role. 
 
 ### Information Available at Time of Prediction
-- Our model is designed to use only post-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We exclused draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
+- Our model is designed to use only in-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We exclused draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
 
 ## Step 4: Baseline Model
-### Baseline Model
+### Model Description and Evaluation
+
+### Why We Chose Logistic Regression
+
+We chose logistic regression for our baseline model because it's a linear, parametric classification technique that models the probability of a player belonging to each role using a sigmoid (logistic) function. According to **Lecture 22**, logistic regression is particularly useful when we want to:
+- Predict probabilities associated with class membership
+- Work with multiclass settings using one-vs-rest or multinomial strategies
+
+#### Features Used
+We included the following seven features, all of which are **quantitative**:
+
+- **kills**: Number of enemy champions eliminated by the player  
+- **assists**: Number of enemy champion eliminations the player contributed to  
+- **deaths**: Number of times the player was eliminated  
+- **dpm**: Damage per minute dealt to enemy champions  
+- **earned gpm**: Gold earned per minute during the match  
+- **cspm**: Creep score per minute (number of minions/monsters killed per minute)  
+- **monsterkills**: Total number of neutral monsters slain  
+
+We did not use any ordinal or nominal features in our model, so no encoding (e.g. one-hot encoding or label encoding) was necessary for the features.
+
+The **target variable** (`position`) is **nominal** (categorical with no inherent order), consisting of five distinct classes: **top, mid, bot, jng, and sup**.
+
+### Model Performance
+`Test Accuracy: 0.6760885885885886`
+<table border="1">
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>F1-Score</th>
+      <th>Support</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>bot</td>
+      <td>0.48</td>
+      <td>0.45</td>
+      <td>0.47</td>
+      <td>5307</td>
+    </tr>
+    <tr>
+      <td>jng</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>5407</td>
+    </tr>
+    <tr>
+      <td>mid</td>
+      <td>0.47</td>
+      <td>0.50</td>
+      <td>0.48</td>
+      <td>5312</td>
+    </tr>
+    <tr>
+      <td>sup</td>
+      <td>0.96</td>
+      <td>0.97</td>
+      <td>0.97</td>
+      <td>5262</td>
+    </tr>
+    <tr>
+      <td>top</td>
+      <td>0.47</td>
+      <td>0.46</td>
+      <td>0.47</td>
+      <td>5352</td>
+    </tr>
+    <tr>
+      <td><strong>accuracy</strong></td>
+      <td colspan="3" style="text-align: center;">0.68</td>
+      <td>26640</td>
+    </tr>
+    <tr>
+      <td><strong>macro avg</strong></td>
+      <td>0.67</td>
+      <td>0.68</td>
+      <td>0.68</td>
+      <td>26640</td>
+    </tr>
+    <tr>
+      <td><strong>weighted avg</strong></td>
+      <td>0.68</td>
+      <td>0.68</td>
+      <td>0.68</td>
+      <td>26640</td>
+    </tr>
+  </tbody>
+</table>
+
+#### Confusion Matrix Insights
+![Confusion Matrix](assets/conf-matrix.png)
+
+The confusion matrix reveals that the model is very confident and correct when predicting Jungle and Support, however, it struggles to correctly classify Bottom, Top, and Mid. These three roles have overlapping in-game stat profiles (e.g., similar kills, assists, and CS patterns), which makes them harder to distinguish using just basic numerical features.
+
+#### Is the Model “Good”?
+
+We believe this baseline model is a good starting point, but not fully sufficient for high-accuracy role classification. The model captures general trends such as supports having high assists and low kills but struggles to differentiate between positions like **top, mid, and jungle**, thus leading to a lower accuracy than wanted.
+
+To improve on this baseline, we plan to:
+- Explore nonlinear models (e.g., k-nearest neighbors, random forest)
+- Include more features or derived features (e.g., KDA ratio, kill participation)
+- Potentially use feature interaction terms via polynomial expansion
+
+Nonetheless, this baseline confirms that in-game performance statistics can offer meaningful insights into role prediction.
 
 ## Step 5: Final Model
-### Final Model
+
+### Feature Engineering
+
+We created three new features based on our prior knowledge of League of Legends and how different roles contribute to team success.
+
+- **KDA (Kills/Death/Assists ratio)**: Reflects individual combat performance. Carry roles, such as Bottom and Mid, are expected to have relatively high KDAs due to their roles as primary damage dealers. In contrast, Support players often accumulate more assists and fewer kills, while Junglers may have moderate kills but also take more risks early-game, leading to lower KDAs on average. This makes KDA a useful feature for separating carry roles (Bot/Mid) from more supportive roles (Support/Jungle).
+  - In our baseline model, we used the individual components `Kills`, `Deaths`, and `Assists` as separate features. We decided to incorporate `KDA` instead of these individual components, since treating these components as independent may leading to redundancy and potential overfitting.
+- **Participation**: Reflects a player’s kill participation rate, calculated as the proportion of kills and assists divided by the total number of team kills. Since Junglers and Supports tend to roam and participate in more fights, we expect higher participation values from them. Conversely, we expect Top and Bottom to have lower participation values, since Top laners tend to be more isolated and Bottom laners tend to focus on their own lane for most of early and mid game.
+- **xptogoldat10**: Calculated as `xpat10 / goldat10`, we created this feature to measure lane efficiency by comparing experience to gold earned at the 10-minute mark. We came up with this feature because Mid laners typically earn more XP per unit of gold due to faster leveling in solo lanes, making this a useful feature to help distinguish Mid from Bottom, a problem we saw in our baseline model.
+
+### Model Selection and Hyperparameters
+
+```python
+Model: Decision Tree
+Test Accuracy: 0.6995495495495495
+
+Model: Random Forest
+Test Accuracy: 0.7177552552552553
+
+Model: Naive Bayes
+Test Accuracy: 0.678978978978979
+
+Model: Logistic Regression
+Test Accuracy: 0.7015765765765766
+
+Model: Neural Network
+Test Accuracy: 0.7228228228228228
+```
+While choosing what model to utilize for our final model, we tested several methods to see what yielded the highest accuracy score. We decided upon a **Random Forest Classifier** for our final model because it performed slightly higher compared to the other methods, and we were both familiar with it. 
+
+We performed hyperparameter tuning using **grid search cross-validation** with 5 folds. The grid search explored various combinations of:
+- `max_depth` ([10, 15, 20, None])
+- `n_estimators` ([100, 200])
+- `min_samples_split` ([2, 5])
+- `min_samples_leaf` ([1, 2])
+- `max_features` ([‘sqrt’, ‘log2’])
+
+The best-performing model used:
+- `n_estimators=200`
+- `max_depth=None`
+- `min_samples_split=5`
+- `min_samples_leaf=1`
+- `max_features='sqrt'`
+
+These hyperparameters were selected based on the highest cross-validation accuracy score during tuning.
+
+### Performance Comparison
+<div style="display: flex; gap: 40px; justify-content: space-between;">
+
+  <div style="flex: 1;">
+    <h4>Baseline Model</h4>
+    <p><code>Test Accuracy: 0.6760885885885886</code></p>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>bot</td><td>0.48</td><td>0.45</td><td>0.47</td><td>5307</td></tr>
+        <tr><td>jng</td><td>1.00</td><td>1.00</td><td>1.00</td><td>5407</td></tr>
+        <tr><td>mid</td><td>0.47</td><td>0.50</td><td>0.48</td><td>5312</td></tr>
+        <tr><td>sup</td><td>0.96</td><td>0.97</td><td>0.97</td><td>5262</td></tr>
+        <tr><td>top</td><td>0.47</td><td>0.46</td><td>0.47</td><td>5352</td></tr>
+        <tr><td><strong>accuracy</strong></td><td colspan="3" style="text-align:center;">0.68</td><td>26640</td></tr>
+        <tr><td><strong>macro avg</strong></td><td>0.67</td><td>0.68</td><td>0.68</td><td>26640</td></tr>
+        <tr><td><strong>weighted avg</strong></td><td>0.68</td><td>0.68</td><td>0.68</td><td>26640</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="flex: 1;">
+    <h4>Final Model</h4>
+    <p><code>Test Accuracy: 0.9207957957957958</code></p>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Class</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Support</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>bot</td><td>0.96</td><td>0.97</td><td>0.97</td><td>4253</td></tr>
+        <tr><td>jng</td><td>1.00</td><td>1.00</td><td>1.00</td><td>4298</td></tr>
+        <tr><td>mid</td><td>0.83</td><td>0.82</td><td>0.82</td><td>4290</td></tr>
+        <tr><td>sup</td><td>0.98</td><td>0.99</td><td>0.99</td><td>4213</td></tr>
+        <tr><td>top</td><td>0.83</td><td>0.83</td><td>0.83</td><td>4258</td></tr>
+        <tr><td><strong>accuracy</strong></td><td colspan="3" style="text-align:center;">0.92</td><td>21312</td></tr>
+        <tr><td><strong>macro avg</strong></td><td>0.92</td><td>0.92</td><td>0.92</td><td>21312</td></tr>
+        <tr><td><strong>weighted avg</strong></td><td>0.92</td><td>0.92</td><td>0.92</td><td>21312</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+- Our final model is a significant improvement from our baseline. First off, our Test Accuracy improved by `0.25`, jumping from **~0.67** in our baseline model to **~0.92** in our final model. Additionally, there are significant improvements in precision, recall, and F1-score across all positions, particularly Bottom, Mid, and Top, which were previously extremely hard to differentiate. 
+
+![Confusion Matrix](conf-matrix-2.png)
+
+The confusion matrix from the Final Model demonstrates far more accurate predictions across all roles, especially in the previously confused categories of Bot, Mid, and Top. The stronger diagonal pattern indicates that misclassifications are now rare and mostly occur between conceptually similar roles, specifically Top and Mid.
+
+Overall, by being very intentional with our features and combining role-aware feature engineering with a robust ensemble classifier and thorough hyperparameter tuning, we improved our model’s performance substantially over the baseline. The Random Forest model generalizes well and captures the nuances of player behavior across different roles, validating our original hypothesis that in-game stats can reliably predict a player’s in-game position.

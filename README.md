@@ -1,6 +1,6 @@
 # Know Your Role: Predicting League of Legends Roles from Player Stats
-## Vinh Tran | vinht@umich.edu
-## CC Ly | vanessly@umich.edu
+### Vinh Tran | vinht@umich.edu
+### CC Ly | vanessly@umich.edu
 
 ## Introduction
 ### Introduction and Question Identification
@@ -64,8 +64,21 @@ Below are the columns relevant to our question:
       <td><code>monsterkills</code></td>
       <td>Total number of neutral monsters killed by the player</td>
     </tr>
+    <tr>
+      <td><code>kda</code></td>
+      <td>Kills/Deaths/Assists ratio: (Kills + Assists) divided by Deaths, used to evaluate combat performance</td>
+    </tr>
+    <tr>
+      <td><code>participation</code></td>
+      <td>Also known as "kill participation". Proportion of team kills a player was involved in (kills or assists)</td>
+    </tr>
+    <tr>
+      <td><code>xptogoldat10</code></td>
+      <td>Ratio of experience points to gold earned at 10 minutes, used to estimate lane efficiency</td>
+    </tr>
   </tbody>
 </table>
+
 
 ## Data Cleaning and Exploratory Data Analysis
 ### Data Cleaning

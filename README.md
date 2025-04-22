@@ -1,20 +1,27 @@
 # Know Your Role: Predicting League of Legends Roles from Player Stats
-### Vinh Tran | vinht@umich.edu
-### CC Ly | vanessly@umich.edu
+### Vinh Tran | [LinkedIn](https://www.linkedin.com/in/vinhmxt/) | vinht@umich.edu
+### CC Ly | [LinkedIn](https://www.linkedin.com/in/vanessly/) | vanessly@umich.edu
 
 ## Introduction
 ### Introduction and Question Identification
 #### Dataset Overview
 
-- In this project, we’re using the **Oracle’s Elixir League of Legends Match Data** from the 2022 season. This dataset contains information from over 10,000 League of Legends professional matches. There are about 120,000 rows in total (each match contributes up to 12 rows: one per player plus two team‑summary rows).
+- In this project, we’re using the **Oracle’s Elixir League of Legends Match Data** from the 2022 season. This dataset contains information from over 10,000 League of Legends professional matches. There are about **120,000** rows in total (each match contributes up to 12 rows: one per player plus two team‑summary rows).
+
+#### What is League of Legends?
+- League of Legends (LoL) is a globally popular multiplayer online battle arena (MOBA) game developed by Riot Games. In each match, two teams of five players compete to destroy the opposing team’s base, called the Nexus, while defending their own. Every player controls a unique character, called a champion, and takes on a specific role on the map: Top, Mid, Jungle, Bottom (Bot), or Support (Sup).
+- Each role comes with distinct responsibilities:
+  - **Top** laners typically play isolated, durable champions who can hold their own.
+  - **Mid** laners often deal heavy damage and control the center of the map.
+  - **Jungler** players move between lanes and neutral zones, securing map objectives such as dragons and supporting teammates.
+  - **Bottom** players focus on dealing consistent damage from range.
+  - **Suppor** players protect and assist teammates, especially the Bot laner, and help control vision on the map.
+
+Throughout the game, players earn gold, experience, and items by defeating enemy champions, minions, and monsters. Their performance is tracked through stats like kills, deaths, assists, damage dealt, and gold earned, many of which are used in our analysis to predict a player’s role.
 
 #### Central Question
 
 > **How accurately can we predict a player’s in‑game role (Top, Jungle, Mid, Bottom, or Support) using only their post‑game performance statistics?**
-
-#### Why It Matters
-
-- Automatically predicting a player’s position from raw match stats has practical value for coaches, pro-players, analysts, and broadcasters. **Coaches** can see if their players' performances line up with expected performances of other players within the same position, and make statistically-backed decisions to optimize their team roster. Simarily, **pro-players** can utilize this tool to see where they are lacking in their skills, and make adjustments to improve their gameplay. **Analysts** and **broadcasters** can utilize this data as a fun and engaging statistic and classifier for audiences. 
 
 #### Key Columns
 
@@ -79,6 +86,9 @@ Below are the columns relevant to our question:
   </tbody>
 </table>
 
+#### Why It Matters
+
+- Automatically predicting a player’s position from raw match stats has practical value for coaches, pro-players, analysts, and broadcasters. **Coaches** can see if their players' performances line up with expected performances of other players within the same position, and make statistically-backed decisions to optimize their team roster. Simarily, **pro-players** can utilize this tool to see where they are lacking in their skills, and make adjustments to improve their gameplay. **Analysts** and **broadcasters** can utilize this data as a fun and engaging statistic and classifier for audiences. 
 
 ## Data Cleaning and Exploratory Data Analysis
 ### Data Cleaning
@@ -102,7 +112,7 @@ print(df.loc[df['gameid'] == 'ESPORTSTMNT01_2690210', 'playername'])
 
 #### 3. Dropped irrelevant columns
 ```python
-cols_to_drop = ['url', 'split', 'pick1', ..., 'monsterkillsenemyjungle']
+cols_to_drop = ['url', 'split', 'pick1', ..., 'firstdragon']
 df.drop(columns=cols_to_drop, inplace=True)
 ```
 - We removed columns that are either:
@@ -118,7 +128,7 @@ df.drop(columns=columns_with_null, inplace=True)
 ```python
 ['playerid', 'teamname', 'teamid', 'ban1', 'ban2', 'ban3', 'ban4', 'ban5', 'barons', 'opp_barons', 'inhibitors', 'opp_inhibitors', 'goldat20', 'xpat20', 'csat20', 'opp_goldat20', 'opp_xpat20', 'opp_csat20', 'golddiffat20', 'xpdiffat20', 'csdiffat20', 'killsat20', 'assistsat20', 'deathsat20', 'opp_killsat20', 'opp_assistsat20', 'opp_deathsat20', 'goldat25', 'xpat25', 'csat25', 'opp_goldat25', 'opp_xpat25', 'opp_csat25', 'golddiffat25', 'xpdiffat25', 'csdiffat25', 'killsat25', 'assistsat25', 'deathsat25', 'opp_killsat25', 'opp_assistsat25', 'opp_deathsat25']
 ```
-- We identified and removed all columns that had missing values. Upon inspection, these columns did not contain statistics that are relevant to our modeling goal (predicting roles based on in-game performance). Similar to above, these columns were either redundant information or team-level data. Keeping them would have required imputation strategies that could introduce bias. 
+- We identified and removed all columns that had missing values. Upon inspection, these columns either did not contain statistics that are relevant to our modeling goal or contained redundant information. Keeping them would have required imputation strategies that could introduce bias to our algorithm. 
 
 #### Final cleaned dataframe
 <div style="overflow-x: auto; max-width: 100%;">
@@ -651,10 +661,10 @@ df.drop(columns=columns_with_null, inplace=True)
  width="800"
  height="600"
  frameborder="0"
- style="display: block; margin: 0; padding: 0;"
+ style="display: block;"
  ></iframe>
 
-- This bar chart displays the average number of kills per game for each player position. We observe that Bottom and Mid positions have the highest kill averages, with Support having the lowest, supporting our idea that in-game statistics like kills can help differentiate between player roles, thus directly addressing our model’s goal of predicting position from performance metrics.
+- This bar chart displays the average number of kills per game for each player position. We observe that Bottom and Mid positions have the highest kill averages, with Support having the lowest, supporting our idea that post-game statistics like kills can help differentiate between player roles, thus directly addressing our model’s goal of predicting position from performance metrics.
 
 
 <iframe
@@ -662,7 +672,7 @@ df.drop(columns=columns_with_null, inplace=True)
  width="800"
  height="600"
  frameborder="0"
- style="display: block; margin: 0; padding: 0;"
+ style="display: block;"
  ></iframe>
 
  - This bar chart compares the average number of kills and assists per game for each player position. This shows us that **supp** players have the highest average assists and the lowest kills, and **jungle** players have more assists on average than **top**, **jungle**, **mid**. However, this also shows that additional features may be needed to accurately distinguish between the latter positions in our role prediction model.
@@ -783,21 +793,21 @@ df.drop(columns=columns_with_null, inplace=True)
 ```python
 ['playerid', 'teamname', 'teamid', 'ban1', 'ban2', 'ban3', 'ban4', 'ban5', 'barons', 'opp_barons', 'inhibitors', 'opp_inhibitors', 'goldat20', 'xpat20', 'csat20', 'opp_goldat20', 'opp_xpat20', 'opp_csat20', 'golddiffat20', 'xpdiffat20', 'csdiffat20', 'killsat20', 'assistsat20', 'deathsat20', 'opp_killsat20', 'opp_assistsat20', 'opp_deathsat20', 'goldat25', 'xpat25', 'csat25', 'opp_goldat25', 'opp_xpat25', 'opp_csat25', 'golddiffat25', 'xpdiffat25', 'csdiffat25', 'killsat25', 'assistsat25', 'deathsat25', 'opp_killsat25', 'opp_assistsat25', 'opp_deathsat25']
 ```
-- We did not impute any missing values. Instead, as described in Step 2, we decided to just remove any columns with missing values altogether because none of the columns with missing values were relevant to our goal of predicting roles based on in-game statistics. All of these columns were either redundant or team information.
+- We did not impute any missing values. Instead, as described in Step 2, we decided to just remove any columns with missing values altogether because none of the columns with missing values were relevant to our goal of predicting roles based on post-game statistics. All of these columns were either redundant or team information.
     - We were able to make this deduction because of our prior knowledge of the game. 
 
 ## Step 3: Framing a Prediction Problem
 ### Problem Identification
-- Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their in-game statistics?"** This is a **multiclass classification** problem, as we are predicting multipled possible categorical roles (one out of five roles)
+- Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their post-game statistics?"** This is a **multiclass classification** problem, as we are predicting multipled possible categorical roles (one out of five roles)
 
 ### Response Variable
-- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their in-game performance statistics, such as `kills`, `assists`, `gold earned per minute`, and `damage dealt per minute`, rather than using manually labeled or externally sourced data.
+- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their post-game performance statistics, such as `kills`, `assists`, `gold earned per minute`, and `damage dealt per minute`, rather than using manually labeled or externally sourced data.
 
 ### Evaluation Metric
 - We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is the most intuitive way to measure how often our model correctly predicts a player’s role. 
 
 ### Information Available at Time of Prediction
-- Our model is designed to use only in-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We excluded draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
+- Our model is designed to use only post-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We excluded draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
 
 ## Baseline Model
 ### Model Description and Evaluation
@@ -896,7 +906,7 @@ The **target variable** (`position`) is **nominal** (categorical with no inheren
 #### Confusion Matrix Insights
 ![Confusion Matrix](assets/conf-matrix.png)
 
-The confusion matrix reveals that the model is very confident and correct when predicting Jungle and Support, however, it struggles to correctly classify Bottom, Top, and Mid. These three roles have overlapping in-game stat profiles (e.g., similar kills, assists, and CS patterns), which makes them harder to distinguish using just basic numerical features.
+The confusion matrix reveals that the model is very confident and correct when predicting Jungle and Support, however, it struggles to correctly classify Bottom, Top, and Mid. These three roles have overlapping post-game stat profiles (e.g., similar kills, assists, and CS patterns), which makes them harder to distinguish using just basic numerical features.
 
 #### Is the Model “Good”?
 
@@ -907,7 +917,7 @@ To improve on this baseline, we plan to:
 - Include more features or derived features (e.g., KDA ratio, kill participation)
 - Potentially use feature interaction terms via polynomial expansion
 
-Nonetheless, this baseline confirms that in-game performance statistics can offer meaningful insights into role prediction.
+Nonetheless, this baseline confirms that post-game performance statistics can offer meaningful insights into role prediction.
 
 ## Final Model
 
@@ -1011,7 +1021,7 @@ These hyperparameters were selected based on the highest cross-validation accura
 
 - The confusion matrix from the Final Model demonstrates far more accurate predictions across all roles, especially in the previously confused categories of Bot, Mid, and Top. The stronger diagonal pattern indicates that misclassifications are now rare and mostly occur between conceptually similar roles, specifically Top and Mid.
 
-- Overall, by being very intentional with our features and thorough hyperparameter tuning, we improved our model’s performance substantially compared to the baseline model. The Random Forest model generalizes well and captures the nuances of player behavior across different roles, validating our original hypothesis that in-game stats can predict a player’s in-game position.
+- Overall, by being very intentional with our features and thorough hyperparameter tuning, we improved our model’s performance substantially compared to the baseline model. The Random Forest model generalizes well and captures the nuances of player behavior across different roles, validating our original hypothesis that post-game stats can predict a player’s post-game position.
 
 ## Conclusion
-- The game League of Legends, as complicated as it is, is designed in such a way that each role have significantly different patterns of gameplay, responsibility, and map behavior, which can be measured by statistics. By examining in-game performance statistics of players from professional League of Legends matches, we were able to successfully create, train, feature-engineer, and fine-tune a model that is able to classify players into their respective role `92%` of the time. 
+- The game League of Legends, as complicated as it is, is designed in such a way that each role have significantly different patterns of gameplay, responsibility, and map behavior, which can be measured by statistics. By examining post-game performance statistics of players from professional League of Legends matches, we were able to successfully create, train, feature-engineer, and fine-tune a model that is able to classify players into their respective role `92%` of the time. 

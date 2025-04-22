@@ -1,11 +1,12 @@
-# League of Legends Analysis: Predicting Player Positions from In-Game Data Using Machine Learning
-### Vinh Tran & CC Ly
+# Know Your Role: Predicting League of Legends Roles from Player Stats
+## Vinh Tran | vinht@umich.edu
+## CC Ly | vanessly@umich.edu
 
-## Step 1: Introduction
+## Introduction
 ### Introduction and Question Identification
 #### Dataset Overview
 
-- For our project, we’re using the **Oracle’s Elixir League of Legends Match Data** from the 2022 season. This dataset contains information from over 10,000 League of Legends professional matches. There are about 120,000 rows in total (each match contributes up to 12 rows: one per player plus two team‑summary rows).
+- In this project, we’re using the **Oracle’s Elixir League of Legends Match Data** from the 2022 season. This dataset contains information from over 10,000 League of Legends professional matches. There are about 120,000 rows in total (each match contributes up to 12 rows: one per player plus two team‑summary rows).
 
 #### Central Question
 
@@ -66,10 +67,10 @@ Below are the columns relevant to our question:
   </tbody>
 </table>
 
-## Step 2: Data Cleaning and Exploratory Data Analysis
+## Data Cleaning and Exploratory Data Analysis
 ### Data Cleaning
 
-- To ensure that our analysis focused only on meaningful, player-level statistics relevant to role prediction, we applied several cleaning steps to the original dataset based on how the original data is structured and generated in the dateset.
+- To ensure that our analysis focused only on meaningful statistics relevant to role prediction, we applied several cleaning steps to the original dataset based on how the original data is structured and generated in the dateset.
 
 #### 1. Filtered only for complete player data
 ```python
@@ -637,6 +638,7 @@ df.drop(columns=columns_with_null, inplace=True)
  width="800"
  height="600"
  frameborder="0"
+ style="display: block; margin: 0; padding: 0;"
  ></iframe>
 
 - This bar chart displays the average number of kills per game for each player position. We observe that Bottom and Mid positions have the highest kill averages, with Support having the lowest, supporting our idea that in-game statistics like kills can help differentiate between player roles, thus directly addressing our model’s goal of predicting position from performance metrics.
@@ -647,6 +649,7 @@ df.drop(columns=columns_with_null, inplace=True)
  width="800"
  height="600"
  frameborder="0"
+ style="display: block; margin: 0; padding: 0;"
  ></iframe>
 
  - This bar chart compares the average number of kills and assists per game for each player position. This shows us that **supp** players have the highest average assists and the lowest kills, and **jungle** players have more assists on average than **top**, **jungle**, **mid**. However, this also shows that additional features may be needed to accurately distinguish between the latter positions in our role prediction model.
@@ -757,7 +760,7 @@ df.drop(columns=columns_with_null, inplace=True)
 </table>
 
 - This pivot table summarizes the number of kills per game by **player position**. Each row corresponds to a unique `gameid`, and each column represents the **total number of kills** made by players in one of the five standard League of Legends roles: **bot**, **jng** (jungle), **mid**, **sup** (support), and **top**.
-- This pivot table is significant because it transforms the raw match-level data into a structured format that allows us to visualize and thus compare the kill contributions of each role across each game. By analyzing these values, we can further observe trends that tell us which roles are contributing more or less kills on average.
+- Doing this allows us to visualize and thus effectively compare the kill contributions of each role across each game. By analyzing these values, we can further observe trends that tell us which roles are contributing more or less kills on average.
 
 ### Imputation
 ```python
@@ -775,20 +778,20 @@ df.drop(columns=columns_with_null, inplace=True)
 - Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their in-game statistics?"** This is a **multiclass classification** problem, as we are predicting multipled possible categorical roles (one out of five roles)
 
 ### Response Variable
-- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their in-game performance statistics—such as kills, assists, gold earned per minute, and damage dealt per minute—rather than using manually labeled or externally sourced data.
+- The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their in-game performance statistics, such as `kills`, `assists`, `gold earned per minute`, and `damage dealt per minute`, rather than using manually labeled or externally sourced data.
 
 ### Evaluation Metric
 - We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is the most intuitive way to measure how often our model correctly predicts a player’s role. 
 
 ### Information Available at Time of Prediction
-- Our model is designed to use only in-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We exclused draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
+- Our model is designed to use only in-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We excluded draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
 
-## Step 4: Baseline Model
+## Baseline Model
 ### Model Description and Evaluation
 
 ### Why We Chose Logistic Regression
 
-We chose logistic regression for our baseline model because it's a linear, parametric classification technique that models the probability of a player belonging to each role using a sigmoid (logistic) function. According to **Lecture 22**, logistic regression is particularly useful when we want to:
+We chose logistic regression for our baseline model because it is particularly useful when we want to:
 - Predict probabilities associated with class membership
 - Work with multiclass settings using one-vs-rest or multinomial strategies
 
@@ -893,7 +896,7 @@ To improve on this baseline, we plan to:
 
 Nonetheless, this baseline confirms that in-game performance statistics can offer meaningful insights into role prediction.
 
-## Step 5: Final Model
+## Final Model
 
 ### Feature Engineering
 
@@ -993,6 +996,9 @@ These hyperparameters were selected based on the highest cross-validation accura
 
 ![Confusion Matrix](conf-matrix-2.png)
 
-The confusion matrix from the Final Model demonstrates far more accurate predictions across all roles, especially in the previously confused categories of Bot, Mid, and Top. The stronger diagonal pattern indicates that misclassifications are now rare and mostly occur between conceptually similar roles, specifically Top and Mid.
+- The confusion matrix from the Final Model demonstrates far more accurate predictions across all roles, especially in the previously confused categories of Bot, Mid, and Top. The stronger diagonal pattern indicates that misclassifications are now rare and mostly occur between conceptually similar roles, specifically Top and Mid.
 
-Overall, by being very intentional with our features and combining role-aware feature engineering with a robust ensemble classifier and thorough hyperparameter tuning, we improved our model’s performance substantially over the baseline. The Random Forest model generalizes well and captures the nuances of player behavior across different roles, validating our original hypothesis that in-game stats can reliably predict a player’s in-game position.
+- Overall, by being very intentional with our features and thorough hyperparameter tuning, we improved our model’s performance substantially compared to the baseline model. The Random Forest model generalizes well and captures the nuances of player behavior across different roles, validating our original hypothesis that in-game stats can predict a player’s in-game position.
+
+## Conclusion
+- The game League of Legends, as complicated as it is, is designed in such a way that each role have significantly different patterns of gameplay, responsibility, and map behavior, which can be measured by statistics. By examining in-game performance statistics of players from professional League of Legends matches, we were able to successfully create, train, feature-engineer, and fine-tune a model that is able to classify players into their respective role `92%` of the time. 

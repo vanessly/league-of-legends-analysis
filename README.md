@@ -130,7 +130,7 @@ df.drop(columns=columns_with_null, inplace=True)
 ```
 - We identified and removed all columns that had missing values. Upon inspection, these columns either did not contain statistics that are relevant to our modeling goal or contained redundant information. Keeping them would have required imputation strategies that could introduce bias to our algorithm. 
 
-#### Final cleaned dataframe
+### Final Cleaned Dataframe
 <div style="overflow-x: auto; max-width: 100%;">
   <table border="1" class="dataframe">
     <thead>
@@ -677,7 +677,6 @@ df.drop(columns=columns_with_null, inplace=True)
 
  - This bar chart compares the average number of kills and assists per game for each player position. This shows us that **supp** players have the highest average assists and the lowest kills, and **jungle** players have more assists on average than **top**, **jungle**, **mid**. However, this also shows that additional features may be needed to accurately distinguish between the latter positions in our role prediction model.
 
-
 ### Interesting Aggregates
 <table border="1" class="dataframe">
   <thead>
@@ -793,18 +792,18 @@ df.drop(columns=columns_with_null, inplace=True)
 ```python
 ['playerid', 'teamname', 'teamid', 'ban1', 'ban2', 'ban3', 'ban4', 'ban5', 'barons', 'opp_barons', 'inhibitors', 'opp_inhibitors', 'goldat20', 'xpat20', 'csat20', 'opp_goldat20', 'opp_xpat20', 'opp_csat20', 'golddiffat20', 'xpdiffat20', 'csdiffat20', 'killsat20', 'assistsat20', 'deathsat20', 'opp_killsat20', 'opp_assistsat20', 'opp_deathsat20', 'goldat25', 'xpat25', 'csat25', 'opp_goldat25', 'opp_xpat25', 'opp_csat25', 'golddiffat25', 'xpdiffat25', 'csdiffat25', 'killsat25', 'assistsat25', 'deathsat25', 'opp_killsat25', 'opp_assistsat25', 'opp_deathsat25']
 ```
-- We did not impute any missing values. Instead, as described in Step 2, we decided to just remove any columns with missing values altogether because none of the columns with missing values were relevant to our goal of predicting roles based on post-game statistics. All of these columns were either redundant or team information.
+- We did not impute any missing values. Instead, as described in Step 2, we decided to just remove any columns with missing values altogether because these columns were either not relevant to our goal, or contained redundant information.
     - We were able to make this deduction because of our prior knowledge of the game. 
 
-## Step 3: Framing a Prediction Problem
+## Framing a Prediction Problem
 ### Problem Identification
-- Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their post-game statistics?"** This is a **multiclass classification** problem, as we are predicting multipled possible categorical roles (one out of five roles)
+- Our prediction problem is: **"How can we predict what role a player is playing (Top, Jungle, Mid, Bottom, or Support) based on their post-game statistics?"** This is a **multiclass classification** problem, as we are predicting multiple possible categorical roles (one out of five roles)
 
 ### Response Variable
 - The **response variable** is the `position` column, which identifies the role each player fulfilled during a match: `top`, `jng`, `mid`, `bot`, or `sup`. We chose this variable because our goal is to infer a player’s role solely from their post-game performance statistics, such as `kills`, `assists`, `gold earned per minute`, and `damage dealt per minute`, rather than using manually labeled or externally sourced data.
 
 ### Evaluation Metric
-- We chose **accuracy** as our primary evaluation metric. Since the five roles are fairly balanced in the dataset and carry equal importance, accuracy is the most intuitive way to measure how often our model correctly predicts a player’s role. 
+- We chose **accuracy** as our primary evaluation metric. Since the five roles are extremely balanced in the dataset and carry equal importance, accuracy is the most intuitive way to measure how often our model correctly predicts a player’s role. 
 
 ### Information Available at Time of Prediction
 - Our model is designed to use only post-game player statistics (e.g., kills, deaths, assists, gold earned, damage per minute) that are known at the time the game concludes. We excluded draft picks, team-level objectives, or opponent statistics (we did this during the data cleaning stage), as these would not be reliable or player-specific indicators for individual performance patterns. 
@@ -812,11 +811,11 @@ df.drop(columns=columns_with_null, inplace=True)
 ## Baseline Model
 ### Model Description and Evaluation
 
-### Why We Chose Logistic Regression
+#### Why We Chose Logistic Regression
 
 We chose logistic regression for our baseline model because it is particularly useful when we want to:
 - Predict probabilities associated with class membership
-- Work with multiclass settings using one-vs-rest or multinomial strategies
+- Work with multiclass settings or multinomial strategies
 
 #### Features Used
 We included the following seven features, all of which are **quantitative**:
@@ -903,10 +902,9 @@ The **target variable** (`position`) is **nominal** (categorical with no inheren
   </tbody>
 </table>
 
-#### Confusion Matrix Insights
 ![Confusion Matrix](assets/conf-matrix.png)
 
-The confusion matrix reveals that the model is very confident and correct when predicting Jungle and Support, however, it struggles to correctly classify Bottom, Top, and Mid. These three roles have overlapping post-game stat profiles (e.g., similar kills, assists, and CS patterns), which makes them harder to distinguish using just basic numerical features.
+These performance statistics reveal that the model is very confident and correct when predicting Jungle and Support, however, it struggles to correctly classify Bottom, Top, and Mid. This checks out intuitively, since these three roles have overlapping post-game stat profiles (e.g., similar kills, assists, and CS patterns), which makes them harder to distinguish using just basic numerical features.
 
 #### Is the Model “Good”?
 
@@ -915,7 +913,6 @@ We believe this baseline model is a good starting point, but not fully sufficien
 To improve on this baseline, we plan to:
 - Explore nonlinear models (e.g., k-nearest neighbors, random forest)
 - Include more features or derived features (e.g., KDA ratio, kill participation)
-- Potentially use feature interaction terms via polynomial expansion
 
 Nonetheless, this baseline confirms that post-game performance statistics can offer meaningful insights into role prediction.
 
@@ -923,14 +920,19 @@ Nonetheless, this baseline confirms that post-game performance statistics can of
 
 ### Feature Engineering
 
-We created three new features based on our prior knowledge of League of Legends and how different roles contribute to team success.
+We created three new features based on the successes and pitfalls of our baseline model, and our prior knowledge of League of Legends and how different roles contribute to team success.
 
-- **KDA (Kills/Death/Assists ratio)**: Reflects individual combat performance. Carry roles, such as Bottom and Mid, are expected to have relatively high KDAs due to their roles as primary damage dealers. In contrast, Support players often accumulate more assists and fewer kills, while Junglers may have moderate kills but also take more risks early-game, leading to lower KDAs on average. This makes KDA a useful feature for separating carry roles (Bot/Mid) from more supportive roles (Support/Jungle).
-  - In our baseline model, we used the individual components `Kills`, `Deaths`, and `Assists` as separate features. We decided to incorporate `KDA` instead of these individual components, since treating these components as independent may leading to redundancy and potential overfitting.
-- **Participation**: Reflects a player’s kill participation rate, calculated as the proportion of kills and assists divided by the total number of team kills. Since Junglers and Supports tend to roam and participate in more fights, we expect higher participation values from them. Conversely, we expect Top and Bottom to have lower participation values, since Top laners tend to be more isolated and Bottom laners tend to focus on their own lane for most of early and mid game.
-- **xptogoldat10**: Calculated as `xpat10 / goldat10`, we created this feature to measure lane efficiency by comparing experience to gold earned at the 10-minute mark. We came up with this feature because Mid laners typically earn more XP per unit of gold due to faster leveling in solo lanes, making this a useful feature to help distinguish Mid from Bottom, a problem we saw in our baseline model.
+- **KDA (Kills/Death/Assists ratio)**: Reflects individual combat performance. Carry roles, such as Bottom and Mid, are expected to have relatively high KDAs due to their roles as primary damage dealers. In contrast, Support players often accumulate more assists and fewer kills, while Junglers may have moderate kills but also take more risks early-game, leading to lower KDAs on average.
+  - This makes KDA a useful feature for separating carry roles (Bot/Mid) from more supportive roles (Support/Jungle).
+  - In our baseline model, we used the individual components `Kills`, `Deaths`, and `Assists` as separate features. We decided to incorporate `KDA` instead of these individual components, since treating these components as independent may leading to redundancy and potential overfitting. We wanted to make our model as streamlined and reduce noise as much as possible.
+- **Participation**: Reflects a player’s kill participation rate, calculated as the proportion of kills and assists divided by the total number of team kills. Since Junglers, Supports, and Mid tend to roam and participate in more fights, we expect higher participation values from them. Conversely, we expect Top and Bottom to have lower participation values, since Top laners tend to be more isolated and Bottom laners tend to focus on their own lane for most of early and mid game.
+  - This would help us differentiate between Top and Bot from and other players. 
+- **xptogoldat10**: Calculated as `xpat10 / goldat10`, we created this feature to measure lane efficiency by comparing experience to gold earned at the 10-minute mark. We came up with this feature because Mid laners typically earn more XP per unit of gold due to faster leveling in solo lanes.
+  - This would be a potentially useful feature to help distinguish Mid from Bottom, one of the largest problems we saw in our baseline model.
 
 ### Model Selection and Hyperparameters
+
+- While choosing what model to utilize for our final model, we tested several methods to see what yielded the highest accuracy score. 
 
 ```python
 Model: Decision Tree
@@ -948,23 +950,23 @@ Test Accuracy: 0.7015765765765766
 Model: Neural Network
 Test Accuracy: 0.7228228228228228
 ```
-While choosing what model to utilize for our final model, we tested several methods to see what yielded the highest accuracy score. We decided upon a **Random Forest Classifier** for our final model because it performed slightly higher compared to the other methods, and we were both familiar with it. 
+- We ultimately decided upon a **Random Forest Classifier** for our final model because it performed slightly higher compared to the other methods, and upon research, performs strongly for classification.
 
-We performed hyperparameter tuning using **grid search cross-validation** with 5 folds. The grid search explored various combinations of:
-- `max_depth` ([10, 15, 20, None])
-- `n_estimators` ([100, 200])
-- `min_samples_split` ([2, 5])
-- `min_samples_leaf` ([1, 2])
-- `max_features` ([‘sqrt’, ‘log2’])
+- We performed hyperparameter tuning using **grid search cross-validation** with 5 folds. The grid search explored various combinations of:
+  - `max_depth` ([10, 15, 20, None])
+  - `n_estimators` ([100, 200])
+  - `min_samples_split` ([2, 5])
+  - `min_samples_leaf` ([1, 2])
+  - `max_features` ([‘sqrt’, ‘log2’])
 
-The best-performing model used:
-- `n_estimators=200`
-- `max_depth=None`
-- `min_samples_split=5`
-- `min_samples_leaf=1`
-- `max_features='sqrt'`
+- The best-performing model used:
+  - `n_estimators=200`
+  - `max_depth=None`
+  - `min_samples_split=5`
+  - `min_samples_leaf=1`
+  - `max_features='sqrt'`
 
-These hyperparameters were selected based on the highest cross-validation accuracy score during tuning.
+- These hyperparameters were selected based on the highest cross-validation accuracy score during tuning.
 
 ### Performance Comparison
 <div style="display: flex; gap: 40px; justify-content: space-between;">
@@ -1017,7 +1019,7 @@ These hyperparameters were selected based on the highest cross-validation accura
 
 - Our final model is a significant improvement from our baseline. First off, our Test Accuracy improved by `0.25`, jumping from **~0.67** in our baseline model to **~0.92** in our final model. Additionally, there are significant improvements in precision, recall, and F1-score across all positions, particularly Bottom, Mid, and Top, which were previously extremely hard to differentiate. 
 
-![Confusion Matrix](conf-matrix-2.png)
+![Confusion Matrix](assets/conf-matrix-2.png)
 
 - The confusion matrix from the Final Model demonstrates far more accurate predictions across all roles, especially in the previously confused categories of Bot, Mid, and Top. The stronger diagonal pattern indicates that misclassifications are now rare and mostly occur between conceptually similar roles, specifically Top and Mid.
 
